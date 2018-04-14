@@ -89,7 +89,7 @@ def main():
     plt.title("Zależność entropii od czasu")
     axes = plt.gca()
     axes.set_xlim(0, times[-1] + 5 - times[-1] % 5)
-    axes.set_ylim(0, values[-1] + 5 - values[-1] % 5)
+    axes.set_ylim(values[0] - 5 + values[0] % 5, values[-1] + 5 - values[-1] % 5)
     plt.show()
 
 
