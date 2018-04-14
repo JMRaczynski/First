@@ -1,6 +1,6 @@
 from itertools import product, cycle
 from random import randrange
-from math import floor
+from math import floor, log
 
 
 def main():
@@ -27,36 +27,66 @@ def main():
     for i in range(N):
         print(states[atoms[i]])
         # print(ns[atoms[i]])
-    print(P)
-    print(states[atoms[1]])
-    atoms[1] += 5*border + 3*step
-    print(states[atoms[1]])
 
-    #czas
-    j = int(input())
-    tj = j*deltat
-    for i in range(len(atoms)):
-        xatoms = floor(states[atoms[i]][0] + tj*states[atoms[i]][2])
-        yatoms = floor(states[atoms[i]][1] + tj*states[atoms[i]][3])
-        ns[atoms[i]] = ns[atoms[i]] - 1
-        while xatoms > R or xatoms < -R:
-            print("a")
-            if xatoms > R:
-                xatoms = R - (xatoms - abs(R - states[atoms[i]][0])) # odbicie od ściany
-                atoms[i] -= (2 * P + 1) * (2 * abs(states[atoms[i]][2])) # mnożenie wektora razy -1
-            elif xatoms < R:
-                xatoms = -R + xatoms - abs(-R - states[atoms[i]][0]) # odbicie od ściany
-                atoms[i] += (2 * P + 1) * (2 * abs(states[atoms[i]][2])) # mnożenie wektora razy -1
-        while yatoms > R or yatoms < -R:
-            print("b")
-            if yatoms > R:
-                yatoms = R - (yatoms - abs(R - states[atoms[i]][1])) # odbicie od ściany
-                atoms[i] -= 2*abs(states[atoms[i]][3]) # mnożenie wektora razy -1
-            elif yatoms < -R:
-                yatoms = -R + yatoms - abs(-R - states[atoms[i]][1]) # odbicie od ściany
-                atoms[i] += 2*abs(states[atoms[i]][3]) # mnożenie wektora razy -1
-        atoms[i] += (xatoms - states[atoms[i]][0])*border + (yatoms - states[atoms[i]][1])*step # zamiana miejsca atomu w tuple
-        ns[atoms[i]] = ns[atoms[i]] + 1
+    def daje_ns_od_tj(j, atoms1, ns1):
+        tj = j*deltat
+        # print(R, P, tj, len(atoms1))
+        for i in range(len(atoms1)):
+            xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])
+            yatoms = floor(states[atoms1[i]][1] + tj*states[atoms1[i]][3])
+            ns1[atoms1[i]] = ns1[atoms1[i]] - 1
+            # print(xatoms, yatoms, i)
+            while xatoms >= R or xatoms < -R:
+                # print(xatoms)
+                if xatoms >= R:
+                    xatoms = 2*R-xatoms - 1 # odbicie od ściany
+                    atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
+                elif xatoms < -R:
+                    xatoms = -xatoms-2*R # odbicie od ściany
+                    atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
+            while yatoms >= R or yatoms < -R:
+                # print(yatoms)
+                if yatoms >= R:
+                    yatoms = 2*R-yatoms - 1 # odbicie od ściany
+                    atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
+                elif yatoms < -R:
+                    yatoms = -yatoms-2*R # odbicie od ściany
+                    atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
+
+            atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step # zamiana miejsca atomu w tuple
+            ns1[atoms1[i]] = ns1[atoms1[i]] + 1
+        return ns1
+
+    def silnia(k):
+        sil = 1
+        i = 1
+        while i <= k:
+            sil *= i
+            i = i + 1
+        return sil
+
+    def prawdopodobienstwo(N1, ns1):
+        praw = silnia(N1)
+        for i in ns1:
+            praw /= silnia(i)
+        return int(praw)
+
+    #for i in range(7):
+       # print(silnia(i))
+
+    maxj = int(input())
+    for i in range(maxj):
+        patoms = atoms[:]
+        pns = ns[:]
+        ns = daje_ns_od_tj(i, atoms, ns)
+        # !!! tutaj liczenie tych prawdopodobieńst !!! #
+        entropia = log(prawdopodobienstwo(N, ns))
+        print(entropia)
+        # !!! tutaj liczenie tych prawdopodobieńst !!! #
+        atoms = patoms[:]
+        ns = pns[:]
+
+
 
 
 
