@@ -1,7 +1,6 @@
 from itertools import product, cycle
 from random import randrange
 from math import floor, log, factorial
-from time import time
 
 
 def main():
@@ -10,14 +9,13 @@ def main():
     R = 2 * r + 1  # maksymalna wartość położenia
     P = r + (1 - r % 2)  # maksymalna wartość pędu
     t = 0  # czas
+    print("P= ", P," R= ", R)
     deltat = 1/2 / P  # krok czasu
     states = tuple(product(range(-R, R + 1), range(-R, R + 1), range(-P, P + 1), range(-P, P + 1)))
     step = (2 * P + 1) ** 2
-    print(step)
     border = (2 * R + 1) * step
-    print(border)
     atoms = []
-    ns = [0*i for i in range(len(states))]
+    ns = [0*i for i in range(len(states))]  # licznik ilości atomów w danym stanie
     atomsleft = N
     for i in cycle(range(0, border, step)):
         atoms.append(randrange(i, i + step))
@@ -25,26 +23,27 @@ def main():
         atomsleft -= 1
         if atomsleft == 0:
             break
+    #print(len(states),states)
     for i in range(N):
         print(states[atoms[i]])
-        # print(ns[atoms[i]])
 
     def daje_ns_od_tj(j, atoms1, ns1):
-        tj = j*deltat
+        tj = j*deltat  # j to numer kroku
+        print("Czas: ",tj)
         # print(R, P, tj, len(atoms1))
         for i in range(len(atoms1)):
-            xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])
-            yatoms = floor(states[atoms1[i]][1] + tj*states[atoms1[i]][3])
+            xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])  # zmiana połozenia X
+            yatoms = floor(states[atoms1[i]][1] + tj*states[atoms1[i]][3])  # zmiana połozenia Y
             ns1[atoms1[i]] = ns1[atoms1[i]] - 1
             # print(xatoms, yatoms, i)
             while xatoms >= R or xatoms < -R:
                 # print(xatoms)
                 if xatoms >= R:
-                    xatoms = 2*R-xatoms - 1 # odbicie od ściany
-                    atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
+                    xatoms = 2*R-xatoms - 1  # odbicie od ściany
+                    atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
                 elif xatoms < -R:
-                    xatoms = -xatoms-2*R - 1 # odbicie od ściany
-                    atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
+                    xatoms = -xatoms-2*R - 1  # odbicie od ściany
+                    atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
             while yatoms >= R or yatoms < -R:
                 # print(yatoms)
                 if yatoms >= R:
@@ -54,24 +53,28 @@ def main():
                     yatoms = -yatoms-2*R - 1 # odbicie od ściany
                     atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
 
-            atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step # zamiana miejsca atomu w tuple
+            atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step  # zamiana miejsca atomu w tuple
             ns1[atoms1[i]] = ns1[atoms1[i]] + 1
+            print("Położenie cząstki ", i, ":\t(", states[atoms1[i]][0], ",", states[atoms1[i]][1], ")", sep='')
+            print("Pęd cząstki ", i, ":\t\t\t(", states[atoms1[i]][2], ",", states[atoms1[i]][3], ")", sep='')
         return ns1
 
     def prawdopodobienstwo(N1, ns1):
         praw = factorial(N1)
         for i in ns1:
             praw /= factorial(i)
-        return int(praw)
+        return praw
 
     maxj = int(input("Wprowadź liczbę kroków czasu"))
+    print('\n')
     for i in range(maxj):
-        patoms = atoms[:]
-        pns = ns[:]
+        patoms = atoms[:]  # kopia tablicy atoms
+        pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns)
+        print('\n')
         # !!! tutaj liczenie tych prawdopodobieńst !!! #
         entropia = log(prawdopodobienstwo(N, ns))
-        print(entropia)
+        #print(entropia)
         # !!! tutaj liczenie tych prawdopodobieńst !!! #
         atoms = patoms[:]
         ns = pns[:]
