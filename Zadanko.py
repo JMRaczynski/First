@@ -1,6 +1,7 @@
 from itertools import product, cycle
 from random import randrange
 from math import floor, log, factorial
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -9,6 +10,8 @@ def main():
     R = 2 * r + 1  # maksymalna wartość położenia
     P = r + (1 - r % 2)  # maksymalna wartość pędu
     t = 0  # czas
+    times = []  # do wykresu
+    values = [] # do wykresu
     print("P= ", P," R= ", R)
     deltat = 1/2 / P  # krok czasu
     states = tuple(product(range(-R, R + 1), range(-R, R + 1), range(-P, P + 1), range(-P, P + 1)))
@@ -30,6 +33,7 @@ def main():
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
         print("Czas: ",tj)
+        times.append(tj)
         # print(R, P, tj, len(atoms1))
         for i in range(len(atoms1)):
             xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])  # zmiana połozenia X
@@ -72,12 +76,21 @@ def main():
         pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns)
         print('\n')
-        # !!! tutaj liczenie tych prawdopodobieńst !!! #
         entropia = log(prawdopodobienstwo(N, ns))
+        values.append(log(prawdopodobienstwo(N, ns)))
         #print(entropia)
-        # !!! tutaj liczenie tych prawdopodobieńst !!! #
         atoms = patoms[:]
         ns = pns[:]
+    #print(values)
+    plt.plot(times, values)
+    plt.xlabel("Czas")
+    plt.grid()
+    plt.ylabel("Entropia układu")
+    plt.title("Zależność entropii od czasu")
+    axes = plt.gca()
+    axes.set_xlim(0, times[-1] + 5 - times[-1] % 5)
+    axes.set_ylim(0, values[-1] + 5 - values[-1] % 5)
+    plt.show()
 
 
 if __name__ == "__main__":
