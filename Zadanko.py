@@ -1,10 +1,11 @@
 from itertools import product, cycle
 from random import randrange
-from math import floor, log
+from math import floor, log, factorial
+from time import time
 
 
 def main():
-    r = int(input())  # zmienny parametr bazowy
+    r = int(input("Wprowadź wartość parametru r"))  # zmienny parametr bazowy
     N = 2 ** r  # ilość cząsteczek
     R = 2 * r + 1  # maksymalna wartość położenia
     P = r + (1 - r % 2)  # maksymalna wartość pędu
@@ -42,7 +43,7 @@ def main():
                     xatoms = 2*R-xatoms - 1 # odbicie od ściany
                     atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
                 elif xatoms < -R:
-                    xatoms = -xatoms-2*R # odbicie od ściany
+                    xatoms = -xatoms-2*R - 1 # odbicie od ściany
                     atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2])) # mnożenie wektora razy -1
             while yatoms >= R or yatoms < -R:
                 # print(yatoms)
@@ -50,31 +51,20 @@ def main():
                     yatoms = 2*R-yatoms - 1 # odbicie od ściany
                     atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
                 elif yatoms < -R:
-                    yatoms = -yatoms-2*R # odbicie od ściany
+                    yatoms = -yatoms-2*R - 1 # odbicie od ściany
                     atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
 
             atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step # zamiana miejsca atomu w tuple
             ns1[atoms1[i]] = ns1[atoms1[i]] + 1
         return ns1
 
-    def silnia(k):
-        sil = 1
-        i = 1
-        while i <= k:
-            sil *= i
-            i = i + 1
-        return sil
-
     def prawdopodobienstwo(N1, ns1):
-        praw = silnia(N1)
+        praw = factorial(N1)
         for i in ns1:
-            praw /= silnia(i)
+            praw /= factorial(i)
         return int(praw)
 
-    #for i in range(7):
-       # print(silnia(i))
-
-    maxj = int(input())
+    maxj = int(input("Wprowadź liczbę kroków czasu"))
     for i in range(maxj):
         patoms = atoms[:]
         pns = ns[:]
@@ -85,11 +75,6 @@ def main():
         # !!! tutaj liczenie tych prawdopodobieńst !!! #
         atoms = patoms[:]
         ns = pns[:]
-
-
-
-
-
 
 
 if __name__ == "__main__":
