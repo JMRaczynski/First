@@ -1,6 +1,6 @@
 from itertools import product, cycle
 from random import randrange
-from math import floor, log, factorial
+from math import floor, log, factorial, e, pi
 import matplotlib.pyplot as plt
 
 
@@ -63,6 +63,16 @@ def main():
             print("Pęd cząstki ", i, ":\t\t\t(", states[atoms1[i]][2], ",", states[atoms1[i]][3], ")", sep='')
         return ns1
 
+    def entrop(N1, ns1):
+        if N1 < 8:
+            return log(prawdopodobienstwo(N, ns))
+        else:
+            ent = N*log(N/e)+log(2*pi*N)/2
+            il = 1
+            for i in ns1:
+                il *= factorial(i);
+            return ent - log(il)
+
     def prawdopodobienstwo(N1, ns1):
         praw = factorial(N1)
         for i in ns1:
@@ -71,16 +81,22 @@ def main():
 
     maxj = int(input("Wprowadź liczbę kroków czasu"))
     print('\n')
+    praw = []
     for i in range(maxj):
         patoms = atoms[:]  # kopia tablicy atoms
         pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns)
+        praw.append(prawdopodobienstwo(N, ns))
         print('\n')
-        entropia = log(prawdopodobienstwo(N, ns))
-        values.append(log(prawdopodobienstwo(N, ns)))
+        entropia = entrop(N, ns)
+        values.append(entropia)
         #print(entropia)
         atoms = patoms[:]
         ns = pns[:]
+    print('\n\n')
+    for i in range(len(times)):
+        print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", round(praw[i]), sep='')
+    #print(maxj, len(times), len(praw))
     #print(values)
     plt.plot(times, values)
     plt.xlabel("Czas")
@@ -88,8 +104,8 @@ def main():
     plt.ylabel("Entropia układu")
     plt.title("Zależność entropii od czasu")
     axes = plt.gca()
-    axes.set_xlim(0, times[-1] + 5 - times[-1] % 5)
-    axes.set_ylim(values[0] - 5 + values[0] % 5, values[-1] + 5 - values[-1] % 5)
+    axes.set_xlim(0, max(times) + 1)
+    axes.set_ylim(min(values) - 1, max(values) + 1)
     plt.show()
 
 
