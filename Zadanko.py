@@ -1,6 +1,6 @@
 from itertools import product, cycle
 from random import randrange
-from math import floor, log, factorial, e, pi
+from math import floor, ceil, log, factorial, e, pi
 import matplotlib.pyplot as plt
 
 
@@ -26,22 +26,18 @@ def main():
         atomsleft -= 1
         if atomsleft == 0:
             break
-    #print(len(states),states)
-    for i in range(N):
-        print(states[atoms[i]])
+    #for i in range(N):
+        #print(states[atoms[i]])
 
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
-        print("Czas: ",tj)
+        print("Czas: ",round(tj, 2))
         times.append(tj)
-        # print(R, P, tj, len(atoms1))
         for i in range(len(atoms1)):
             xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])  # zmiana połozenia X
             yatoms = floor(states[atoms1[i]][1] + tj*states[atoms1[i]][3])  # zmiana połozenia Y
             ns1[atoms1[i]] = ns1[atoms1[i]] - 1
-            # print(xatoms, yatoms, i)
             while xatoms >= R or xatoms < -R:
-                # print(xatoms)
                 if xatoms >= R:
                     xatoms = 2*R-xatoms - 1  # odbicie od ściany
                     atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
@@ -49,7 +45,6 @@ def main():
                     xatoms = -xatoms-2*R - 1  # odbicie od ściany
                     atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
             while yatoms >= R or yatoms < -R:
-                # print(yatoms)
                 if yatoms >= R:
                     yatoms = 2*R-yatoms - 1 # odbicie od ściany
                     atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
@@ -85,27 +80,24 @@ def main():
     for i in range(maxj):
         patoms = atoms[:]  # kopia tablicy atoms
         pns = ns[:]  # kopia tablicy
-        ns = daje_ns_od_tj(i, atoms, ns)
-        praw.append(prawdopodobienstwo(N, ns))
+        ns = daje_ns_od_tj(i, atoms, ns) # przeprowadzenie symulacji dla kolejnego kroku czasu
+        praw.append(prawdopodobienstwo(N, ns)) # obliczanie prawdopodobienstwa
         print('\n')
-        entropia = entrop(N, ns)
+        entropia = entrop(N, ns) # obliczanie entropii
         values.append(entropia)
-        #print(entropia)
         atoms = patoms[:]
         ns = pns[:]
     print('\n\n')
     for i in range(len(times)):
-        print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", round(praw[i]), sep='')
-    #print(maxj, len(times), len(praw))
-    #print(values)
+        print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", '{:0.2e}'.format(praw[i]), sep='')
     plt.plot(times, values)
     plt.xlabel("Czas")
     plt.grid()
     plt.ylabel("Entropia układu")
     plt.title("Zależność entropii od czasu")
     axes = plt.gca()
-    axes.set_xlim(0, max(times) + 1)
-    axes.set_ylim(min(values) - 1, max(values) + 1)
+    axes.set_xlim(0, floor(max(times) + 1))
+    axes.set_ylim(ceil(min(values) - 1), floor(max(values) + 1))
     plt.show()
 
 
