@@ -1,22 +1,26 @@
 from itertools import product, cycle
-from random import randrange
+from random import randrange, seed
 from math import floor, ceil, log, factorial, e, pi
+from time import time
 import matplotlib.pyplot as plt
 
 
 def main():
-    r = int(input("Wprowadź wartość parametru r"))  # zmienny parametr bazowy
-    N = 2 ** r  # ilość cząsteczek
-    R = 2 * r + 1  # maksymalna wartość położenia
-    P = r + (1 - r % 2)  # maksymalna wartość pędu
+    seed(time())
+    r = int(input("Wprowadź wartość parametru r "))  # zmienny parametr bazowy
+    N = (2**r) ** r  # ilość cząsteczek
+    #N = 72000
+    R = 3 * r + 1  # maksymalna wartość położenia
+    P = 2 * r + (1 - r % 2)  # maksymalna wartość pędu
+    #P = 3
     t = 0  # czas
     times = []  # do wykresu
     values = [] # do wykresu
     print("P= ", P," R= ", R)
     deltat = 1/2 / P  # krok czasu
-    states = tuple(product(range(-R, R + 1), range(-R, R + 1), range(-P, P + 1), range(-P, P + 1)))
-    step = (2 * P + 1) ** 2
-    border = (2 * R + 1) * step
+    states = tuple(product(range(-R, R), range(-R, R), range(-P, P), range(-P, P)))
+    step = (2 * P) ** 2
+    border = (2 * R) * step
     atoms = []
     ns = [0*i for i in range(len(states))]  # licznik ilości atomów w danym stanie
     atomsleft = N
@@ -26,12 +30,14 @@ def main():
         atomsleft -= 1
         if atomsleft == 0:
             break
-    #for i in range(N):
-        #print(states[atoms[i]])
+    print("Ilość stanów ", len(states))
+    print("ilość cząsteczek", len(atoms))
+    for i in range(N):
+        print(atoms[i])
 
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
-        print("Czas: ",round(tj, 2))
+        print("Czas: ", round(tj, 2))
         times.append(tj)
         for i in range(len(atoms1)):
             xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])  # zmiana połozenia X
@@ -59,13 +65,13 @@ def main():
         return ns1
 
     def entrop(N1, ns1):
-        if N1 < 8:
-            return log(prawdopodobienstwo(N, ns))
+        if N1 < 128:
+            return log(prawdopodobienstwo(N1, ns1))
         else:
-            ent = N*log(N/e)+log(2*pi*N)/2
+            ent = N1*log(N1/e)+log(2*pi*N1)/2
             il = 1
             for i in ns1:
-                il *= factorial(i);
+                il *= factorial(i)
             return ent - log(il)
 
     def prawdopodobienstwo(N1, ns1):
@@ -74,22 +80,31 @@ def main():
             praw /= factorial(i)
         return praw
 
-    maxj = int(input("Wprowadź liczbę kroków czasu"))
+    maxj = int(input("Wprowadź liczbę kroków czasu "))
     print('\n')
     praw = []
     for i in range(maxj):
         patoms = atoms[:]  # kopia tablicy atoms
         pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns) # przeprowadzenie symulacji dla kolejnego kroku czasu
-        praw.append(prawdopodobienstwo(N, ns)) # obliczanie prawdopodobienstwa
+        #for j in range(len(ns)):
+            #if ns[j] != 0:
+               # print("Liczba cząsteczek w stanie o indeksie ", j, ": ", ns[j], sep='')
+        if N < 128:
+            praw.append(prawdopodobienstwo(N, ns)) # obliczanie prawdopodobienstwa
         print('\n')
         entropia = entrop(N, ns) # obliczanie entropii
         values.append(entropia)
+        #print(atoms[:])
+        print(ns[:])
         atoms = patoms[:]
         ns = pns[:]
+        #print(atoms[:])
+        print(ns[:])
     print('\n\n')
-    for i in range(len(times)):
-        print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", '{:0.2e}'.format(praw[i]), sep='')
+    if N < 128:
+        for i in range(len(times)):
+            print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", '{:0.2e}'.format(praw[i]), sep='')
     plt.plot(times, values)
     plt.xlabel("Czas")
     plt.grid()
@@ -99,6 +114,7 @@ def main():
     axes.set_xlim(0, floor(max(times) + 1))
     axes.set_ylim(ceil(min(values) - 1), floor(max(values) + 1))
     plt.show()
+    del ns, atoms, states, values, times, patoms, pns
 
 
 if __name__ == "__main__":
