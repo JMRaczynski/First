@@ -9,9 +9,9 @@ def main():
     seed(time())
     r = int(input("Wprowadź wartość parametru r "))  # zmienny parametr bazowy
     N = (2**r) ** r  # ilość cząsteczek
-    #N = 72000
-    R = 3 * r + 1  # maksymalna wartość położenia
-    P = 2 * r + (1 - r % 2)  # maksymalna wartość pędu
+    #N = 100000
+    R = 2 * r + 1  # maksymalna wartość położenia
+    P = r + (1 - r % 2)  # maksymalna wartość pędu
     #P = 3
     t = 0  # czas
     times = []  # do wykresu
@@ -45,17 +45,29 @@ def main():
             ns1[atoms1[i]] = ns1[atoms1[i]] - 1
             while xatoms >= R or xatoms < -R:
                 if xatoms >= R:
-                    xatoms = 2*R-xatoms - 1  # odbicie od ściany
-                    atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
+                    if xatoms == states[atoms1[i]][0] + tj*states[atoms1[i]][2]:
+                        xatoms = 2*R-xatoms
+                    else:
+                        xatoms = 2*R-xatoms - 1  # odbicie od ściany
+                    atoms1[i] -= (2 * P) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
                 elif xatoms < -R:
-                    xatoms = -xatoms-2*R - 1  # odbicie od ściany
-                    atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
+                    if xatoms == states[atoms1[i]][0] + tj*states[atoms1[i]][2]:
+                        xatoms = -xatoms - 2*R
+                    else:
+                        xatoms = -xatoms-2*R - 1  # odbicie od ściany
+                    atoms1[i] += (2 * P) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
             while yatoms >= R or yatoms < -R:
                 if yatoms >= R:
-                    yatoms = 2*R-yatoms - 1 # odbicie od ściany
+                    if yatoms == states[atoms1[i]][1] + tj*states[atoms1[i]][3]:
+                        yatoms = 2*R-yatoms
+                    else:
+                        yatoms = 2*R-yatoms - 1 # odbicie od ściany
                     atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
                 elif yatoms < -R:
-                    yatoms = -yatoms-2*R - 1 # odbicie od ściany
+                    if yatoms == states[atoms1[i]][1] + tj*states[atoms1[i]][3]:
+                        yatoms = -yatoms - 2*R
+                    else:
+                        yatoms = -yatoms-2*R - 1 # odbicie od ściany
                     atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
 
             atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step  # zamiana miejsca atomu w tuple
@@ -96,11 +108,11 @@ def main():
         entropia = entrop(N, ns) # obliczanie entropii
         values.append(entropia)
         #print(atoms[:])
-        print(ns[:])
+        #print(ns[:])
         atoms = patoms[:]
         ns = pns[:]
         #print(atoms[:])
-        print(ns[:])
+        #print(ns[:])
     print('\n\n')
     if N < 128:
         for i in range(len(times)):
