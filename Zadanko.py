@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 def main():
     seed(time())
     r = int(input("Wprowadź wartość parametru r "))  # zmienny parametr bazowy
-    N = 2**r # ilość cząsteczek
+    N = (2**r)**r # ilość cząsteczek
     R = 2 * r + 1  # maksymalna wartość położenia
     P = r + (1 - r % 2)  # maksymalna wartość pędu
     t = 0  # czas
@@ -31,15 +31,6 @@ def main():
     print("Ilość stanów ", len(states))
     print("ilość cząsteczek", len(atoms))
 
-    q = 0
-    atoms[0] = q
-    ns[q]=1
-    print(states[q])
-    q += (2 * P + 1) * (2 * abs(states[q][2]))
-    q += 2 * abs(states[q][3])
-    print(states[q])
-    #atoms1[i] += (xatoms - states[atoms1[i]][0]) * border + (yatoms - states[q][1]) * step
-
 
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
@@ -51,17 +42,23 @@ def main():
             ns1[atoms1[i]] = ns1[atoms1[i]] - 1
             #print(xatoms, yatoms)
             while xatoms >= R or xatoms < -R:
-                if xatoms >= R:
+                if xatoms > R:
                     xatoms = 2*R - xatoms  # odbicie od ściany
+                    atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
+                elif xatoms == R:
+                    xatoms = R-1
                     atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
                 elif xatoms < -R:
                     xatoms = -xatoms - 2*R  # odbicie od ściany
                     atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
                 #print(xatoms, states[atoms1[i]])
             while yatoms >= R or yatoms < -R:
-                if yatoms >= R:
+                if yatoms > R:
                     yatoms = 2*R - yatoms # odbicie od ściany
                     atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
+                elif yatoms == R:
+                    yatoms = R-1
+                    atoms1[i] -= 2 * abs(states[atoms1[i]][3])  # mnożenie wektora razy -1
                 elif yatoms < -R:
                     yatoms = -yatoms - 2*R # odbicie od ściany
                     atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
