@@ -8,18 +8,16 @@ import matplotlib.pyplot as plt
 def main():
     seed(time())
     r = int(input("Wprowadź wartość parametru r "))  # zmienny parametr bazowy
-    N = (2**r) ** r  # ilość cząsteczek
-    #N = 72000
-    R = 3 * r + 1  # maksymalna wartość położenia
-    P = 2 * r + (1 - r % 2)  # maksymalna wartość pędu
-    #P = 3
+    N = 2**r # ilość cząsteczek
+    R = 2 * r + 1  # maksymalna wartość położenia
+    P = r + (1 - r % 2)  # maksymalna wartość pędu
     t = 0  # czas
     times = []  # do wykresu
     values = [] # do wykresu
     print("P= ", P," R= ", R)
     deltat = 1/2 / P  # krok czasu
-    states = tuple(product(range(-R, R), range(-R, R), range(-P, P), range(-P, P)))
-    step = (2 * P) ** 2
+    states = tuple(product(range(-R, R), range(-R, R), range(-P, P+1), range(-P, P+1)))
+    step = (2 * P+1) ** 2
     border = (2 * R) * step
     atoms = []
     ns = [0*i for i in range(len(states))]  # licznik ilości atomów w danym stanie
@@ -32,32 +30,45 @@ def main():
             break
     print("Ilość stanów ", len(states))
     print("ilość cząsteczek", len(atoms))
-    for i in range(N):
-        print(atoms[i])
+
+    q = 0
+    atoms[0] = q
+    ns[q]=1
+    print(states[q])
+    q += (2 * P + 1) * (2 * abs(states[q][2]))
+    q += 2 * abs(states[q][3])
+    print(states[q])
+    #atoms1[i] += (xatoms - states[atoms1[i]][0]) * border + (yatoms - states[q][1]) * step
+
 
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
         print("Czas: ", round(tj, 2))
         times.append(tj)
         for i in range(len(atoms1)):
-            xatoms = floor(states[atoms1[i]][0] + tj*states[atoms1[i]][2])  # zmiana połozenia X
-            yatoms = floor(states[atoms1[i]][1] + tj*states[atoms1[i]][3])  # zmiana połozenia Y
+            xatoms = states[atoms1[i]][0] + tj*states[atoms1[i]][2]  # zmiana połozenia X
+            yatoms = states[atoms1[i]][1] + tj*states[atoms1[i]][3]  # zmiana połozenia Y
             ns1[atoms1[i]] = ns1[atoms1[i]] - 1
+            #print(xatoms, yatoms)
             while xatoms >= R or xatoms < -R:
                 if xatoms >= R:
-                    xatoms = 2*R-xatoms - 1  # odbicie od ściany
+                    xatoms = 2*R - xatoms  # odbicie od ściany
                     atoms1[i] -= (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
                 elif xatoms < -R:
-                    xatoms = -xatoms-2*R - 1  # odbicie od ściany
+                    xatoms = -xatoms - 2*R  # odbicie od ściany
                     atoms1[i] += (2 * P + 1) * (2 * abs(states[atoms1[i]][2]))  # mnożenie wektora razy -1
+                #print(xatoms, states[atoms1[i]])
             while yatoms >= R or yatoms < -R:
                 if yatoms >= R:
-                    yatoms = 2*R-yatoms - 1 # odbicie od ściany
+                    yatoms = 2*R - yatoms # odbicie od ściany
                     atoms1[i] -= 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
                 elif yatoms < -R:
-                    yatoms = -yatoms-2*R - 1 # odbicie od ściany
+                    yatoms = -yatoms - 2*R # odbicie od ściany
                     atoms1[i] += 2*abs(states[atoms1[i]][3]) # mnożenie wektora razy -1
+                #print(yatoms, states[atoms1[i]])
 
+            xatoms = floor(xatoms)
+            yatoms = floor(yatoms)
             atoms1[i] += (xatoms - states[atoms1[i]][0])*border + (yatoms - states[atoms1[i]][1])*step  # zamiana miejsca atomu w tuple
             ns1[atoms1[i]] = ns1[atoms1[i]] + 1
             print("Położenie cząstki ", i, ":\t(", states[atoms1[i]][0], ",", states[atoms1[i]][1], ")", sep='')
@@ -87,24 +98,18 @@ def main():
         patoms = atoms[:]  # kopia tablicy atoms
         pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns) # przeprowadzenie symulacji dla kolejnego kroku czasu
-        #for j in range(len(ns)):
-            #if ns[j] != 0:
-               # print("Liczba cząsteczek w stanie o indeksie ", j, ": ", ns[j], sep='')
+        for j in range(len(ns)):
+            if ns[j] != 0:
+                print("Liczba cząsteczek w stanie o indeksie ", j, ": ", ns[j], sep='')
         if N < 128:
             praw.append(prawdopodobienstwo(N, ns)) # obliczanie prawdopodobienstwa
+            print("Wartość prawdopodobieństwa termodynamicznego: ", '{:0.2e}'.format(praw[i]), sep='')
         print('\n')
         entropia = entrop(N, ns) # obliczanie entropii
         values.append(entropia)
-        #print(atoms[:])
-        print(ns[:])
         atoms = patoms[:]
         ns = pns[:]
-        #print(atoms[:])
-        print(ns[:])
     print('\n\n')
-    if N < 128:
-        for i in range(len(times)):
-            print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", '{:0.2e}'.format(praw[i]), sep='')
     plt.plot(times, values)
     plt.xlabel("Czas")
     plt.grid()
@@ -112,7 +117,7 @@ def main():
     plt.title("Zależność entropii od czasu")
     axes = plt.gca()
     axes.set_xlim(0, floor(max(times) + 1))
-    axes.set_ylim(ceil(min(values) - 1), floor(max(values) + 1))
+    axes.set_ylim(ceil(min(values) - 10), floor(max(values) + 10))
     plt.show()
     del ns, atoms, states, values, times, patoms, pns
 
