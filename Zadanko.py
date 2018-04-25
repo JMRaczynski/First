@@ -8,11 +8,9 @@ import matplotlib.pyplot as plt
 def main():
     seed(time())
     r = int(input("Wprowadź wartość parametru r "))  # zmienny parametr bazowy
-    N = (2**r) ** r  # ilość cząsteczek
-    #N = 100000
+    N = 2**r # ilość cząsteczek
     R = 2 * r + 1  # maksymalna wartość położenia
     P = r + (1 - r % 2)  # maksymalna wartość pędu
-    #P = 3
     t = 0  # czas
     times = []  # do wykresu
     values = [] # do wykresu
@@ -32,8 +30,6 @@ def main():
             break
     print("Ilość stanów ", len(states))
     print("ilość cząsteczek", len(atoms))
-    for i in range(N):
-        print(atoms[i])
 
     def daje_ns_od_tj(j, atoms1, ns1):
         tj = j*deltat  # j to numer kroku
@@ -99,24 +95,18 @@ def main():
         patoms = atoms[:]  # kopia tablicy atoms
         pns = ns[:]  # kopia tablicy
         ns = daje_ns_od_tj(i, atoms, ns) # przeprowadzenie symulacji dla kolejnego kroku czasu
-        #for j in range(len(ns)):
-            #if ns[j] != 0:
-               # print("Liczba cząsteczek w stanie o indeksie ", j, ": ", ns[j], sep='')
+        for j in range(len(ns)):
+            if ns[j] != 0:
+                print("Liczba cząsteczek w stanie o indeksie ", j, ": ", ns[j], sep='')
         if N < 128:
             praw.append(prawdopodobienstwo(N, ns)) # obliczanie prawdopodobienstwa
+            print("Wartość prawdopodobieństwa termodynamicznego: ", '{:0.2e}'.format(praw[i]), sep='')
         print('\n')
         entropia = entrop(N, ns) # obliczanie entropii
         values.append(entropia)
-        #print(atoms[:])
-        #print(ns[:])
         atoms = patoms[:]
         ns = pns[:]
-        #print(atoms[:])
-        #print(ns[:])
     print('\n\n')
-    if N < 128:
-        for i in range(len(times)):
-            print("Czas: ", round(times[i], 2), " Wartość prawdopodobieństwa: ", '{:0.2e}'.format(praw[i]), sep='')
     plt.plot(times, values)
     plt.xlabel("Czas")
     plt.grid()
@@ -124,7 +114,7 @@ def main():
     plt.title("Zależność entropii od czasu")
     axes = plt.gca()
     axes.set_xlim(0, floor(max(times) + 1))
-    axes.set_ylim(ceil(min(values) - 1), floor(max(values) + 1))
+    axes.set_ylim(ceil(min(values) - 10), floor(max(values) + 10))
     plt.show()
     del ns, atoms, states, values, times, patoms, pns
 
